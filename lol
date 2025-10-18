@@ -1,6 +1,4 @@
--- Dat99013 Fly GUI V5 | Blue Theme & White Font | Fly + Noclip
--- Place in StarterPlayer -> StarterPlayerScripts
-
+-- Dat99013 Fly GUI V10 | Fly + Noclip | Joystick Control + Rainbow Theme
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
@@ -16,10 +14,10 @@ main.ResetOnSpawn = false
 
 local Frame = Instance.new("Frame")
 Frame.Parent = main
-Frame.BackgroundColor3 = Color3.fromRGB(20, 60, 150)
-Frame.BorderColor3 = Color3.fromRGB(15, 45, 120)
-Frame.Position = UDim2.new(0.1,0,0.4,0)
-Frame.Size = UDim2.new(0, 220, 0, 60)
+Frame.BackgroundColor3 = Color3.fromRGB(20,60,150)
+Frame.BorderColor3 = Color3.fromRGB(15,45,120)
+Frame.Position = UDim2.new(0.05,0,0.3,0)
+Frame.Size = UDim2.new(0,220,0,100)
 Frame.Active = true
 Frame.Draggable = true
 
@@ -29,84 +27,63 @@ TextLabel.Parent = Frame
 TextLabel.Size = UDim2.new(1,0,0,28)
 TextLabel.Position = UDim2.new(0,0,0,0)
 TextLabel.BackgroundTransparency = 1
-TextLabel.Text = "FLY GUI V5"
+TextLabel.Text = "FLY GUI V10"
 TextLabel.TextColor3 = Color3.fromRGB(255,255,255)
 TextLabel.TextScaled = true
 TextLabel.Font = Enum.Font.SourceSansBold
 
 -- Fly toggle
-local onof = Instance.new("TextButton")
-onof.Parent = Frame
-onof.Size = UDim2.new(0, 60, 0, 28)
-onof.Position = UDim2.new(0.6, 0, 0.5, 0)
-onof.BackgroundColor3 = Color3.fromRGB(0, 120, 230)
-onof.TextColor3 = Color3.fromRGB(255,255,255)
-onof.Text = "Fly: OFF"
-onof.Font = Enum.Font.SourceSans
-onof.TextScaled = true
+local flyBtn = Instance.new("TextButton")
+flyBtn.Parent = Frame
+flyBtn.Size = UDim2.new(0,80,0,28)
+flyBtn.Position = UDim2.new(0.05,0,0.35,0)
+flyBtn.BackgroundColor3 = Color3.fromRGB(0,120,230)
+flyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+flyBtn.Text = "Fly: OFF"
+flyBtn.TextScaled = true
+flyBtn.Font = Enum.Font.SourceSans
 
 -- Noclip toggle
 local noclipBtn = Instance.new("TextButton")
 noclipBtn.Parent = Frame
-noclipBtn.Size = UDim2.new(0, 60, 0, 28)
-noclipBtn.Position = UDim2.new(0.8, 0, 0.5, 0)
-noclipBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+noclipBtn.Size = UDim2.new(0,80,0,28)
+noclipBtn.Position = UDim2.new(0.55,0,0.35,0)
+noclipBtn.BackgroundColor3 = Color3.fromRGB(0,200,120)
 noclipBtn.TextColor3 = Color3.fromRGB(255,255,255)
 noclipBtn.Text = "Noclip: OFF"
-noclipBtn.Font = Enum.Font.SourceSans
 noclipBtn.TextScaled = true
+noclipBtn.Font = Enum.Font.SourceSans
 
--- Up / Down buttons
-local up = Instance.new("TextButton")
-up.Parent = Frame
-up.Size = UDim2.new(0, 44, 0, 28)
-up.Position = UDim2.new(0,0,0.5,0)
-up.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-up.Text = "UP"
-up.TextColor3 = Color3.fromRGB(255,255,255)
-up.Font = Enum.Font.SourceSans
-up.TextScaled = true
-
-local down = Instance.new("TextButton")
-down.Parent = Frame
-down.Size = UDim2.new(0, 44, 0, 28)
-down.Position = UDim2.new(0.25,0,0.5,0)
-down.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
-down.Text = "DOWN"
-down.TextColor3 = Color3.fromRGB(255,255,255)
-down.Font = Enum.Font.SourceSans
-down.TextScaled = true
-
--- Speed
+-- Speed controls
 local plus = Instance.new("TextButton")
 plus.Parent = Frame
-plus.Size = UDim2.new(0, 40,0,28)
-plus.Position = UDim2.new(0.25,0,0,0)
-plus.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+plus.Size = UDim2.new(0,40,0,28)
+plus.Position = UDim2.new(0.7,0,0.65,0)
+plus.BackgroundColor3 = Color3.fromRGB(0,180,255)
 plus.Text = "+"
 plus.TextColor3 = Color3.fromRGB(255,255,255)
-plus.Font = Enum.Font.SourceSans
 plus.TextScaled = true
+plus.Font = Enum.Font.SourceSans
 
 local mine = Instance.new("TextButton")
 mine.Parent = Frame
-mine.Size = UDim2.new(0, 40,0,28)
-mine.Position = UDim2.new(0,0,0,0)
-mine.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+mine.Size = UDim2.new(0,40,0,28)
+mine.Position = UDim2.new(0.85,0,0.65,0)
+mine.BackgroundColor3 = Color3.fromRGB(0,180,255)
 mine.Text = "-"
 mine.TextColor3 = Color3.fromRGB(255,255,255)
-mine.Font = Enum.Font.SourceSans
 mine.TextScaled = true
+mine.Font = Enum.Font.SourceSans
 
-local speed = Instance.new("TextLabel")
-speed.Parent = Frame
-speed.Size = UDim2.new(0, 44,0,28)
-speed.Position = UDim2.new(0.5,0,0,0)
-speed.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-speed.TextColor3 = Color3.fromRGB(255,255,255)
-speed.Text = "1"
-speed.TextScaled = true
-speed.Font = Enum.Font.SourceSans
+local speedLabel = Instance.new("TextLabel")
+speedLabel.Parent = Frame
+speedLabel.Size = UDim2.new(0,44,0,28)
+speedLabel.Position = UDim2.new(0.55,0,0.65,0)
+speedLabel.BackgroundColor3 = Color3.fromRGB(0,100,200)
+speedLabel.TextColor3 = Color3.fromRGB(255,255,255)
+speedLabel.Text = "1"
+speedLabel.TextScaled = true
+speedLabel.Font = Enum.Font.SourceSans
 
 -- Minimize / Restore
 local mini = Instance.new("TextButton")
@@ -130,17 +107,15 @@ mini2.Font = Enum.Font.SourceSans
 mini2.TextScaled = true
 mini2.Visible = false
 
--- ---------------- Fly & Noclip Logic ----------------
+-- ---------------- Fly & Noclip ----------------
 local flying = false
 local noclip = false
 local speedVal = 1
-local flyUp, flyDown = false, false
+speedLabel.Text = tostring(speedVal)
 
-speed.Text = tostring(speedVal)
-
-onof.MouseButton1Click:Connect(function()
+flyBtn.MouseButton1Click:Connect(function()
 	flying = not flying
-	onof.Text = "Fly: "..(flying and "ON" or "OFF")
+	flyBtn.Text = "Fly: "..(flying and "ON" or "OFF")
 	hum.PlatformStand = flying
 end)
 
@@ -151,43 +126,45 @@ end)
 
 plus.MouseButton1Click:Connect(function()
 	speedVal = speedVal + 1
-	speed.Text = tostring(speedVal)
+	speedLabel.Text = tostring(speedVal)
 end)
 
 mine.MouseButton1Click:Connect(function()
 	if speedVal > 1 then
 		speedVal = speedVal - 1
-		speed.Text = tostring(speedVal)
+		speedLabel.Text = tostring(speedVal)
 	end
 end)
 
-up.MouseButton1Click:Connect(function()
-	flyUp = true
-end)
-up.MouseButton1Release:Connect(function()
-	flyUp = false
-end)
+-- Rainbow Theme Helper
+local function rainbowColor(tick, speed)
+	local hue = tick * speed % 1
+	return Color3.fromHSV(hue,1,1)
+end
 
-down.MouseButton1Click:Connect(function()
-	flyDown = true
-end)
-down.MouseButton1Release:Connect(function()
-	flyDown = false
-end)
-
--- Heartbeat fly/noclip
+-- Fly with joystick & Noclip loop
 RunService.Heartbeat:Connect(function(dt)
 	if flying then
-		local move = Vector3.new()
-		if flyUp then move = move + Vector3.new(0,1,0) end
-		if flyDown then move = move + Vector3.new(0,-1,0) end
-		hrp.CFrame = hrp.CFrame + move * speedVal * dt * 50
+		local move = hum.MoveDirection
+		if move.Magnitude > 0 then
+			hrp.CFrame = hrp.CFrame + move.Unit * speedVal * dt * 50
+		end
 	end
 	if noclip then
 		for _, part in pairs(char:GetDescendants()) do
 			if part:IsA("BasePart") then
 				part.CanCollide = false
 			end
+		end
+	end
+	-- Rainbow animation
+	local tick = os.clock()
+	Frame.BackgroundColor3 = rainbowColor(tick,0.1)
+	TextLabel.TextColor3 = rainbowColor(tick,0.2)
+	for _, btn in pairs(Frame:GetChildren()) do
+		if btn:IsA("TextButton") then
+			btn.BackgroundColor3 = rainbowColor(tick,0.15)
+			btn.TextColor3 = Color3.fromRGB(0,0,0)
 		end
 	end
 end)
