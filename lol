@@ -1,282 +1,216 @@
--- Dat99013 Menu | Cleaned-up | No Mobile Buttons
+-- Dat99013 Fly GUI V5 | Blue Theme & White Font | Fly + Noclip
 -- Place in StarterPlayer -> StarterPlayerScripts
 
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local hum = char:WaitForChild("Humanoid")
 
--- Character refs
-local character = player.Character or player.CharacterAdded:Wait()
-local humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid")
-local hrp = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart")
+-- GUI
+local main = Instance.new("ScreenGui")
+main.Name = "FlyGUI"
+main.Parent = player:WaitForChild("PlayerGui")
+main.ResetOnSpawn = false
 
-local function refreshCharacterRefs()
-	character = player.Character or player.CharacterAdded:Wait()
-	humanoid = character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid")
-	hrp = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart")
-end
-
--- States
-local flying, noclip, invisible = false, false, false
-local FLY_SPEED, VERTICAL_SPEED = 50, 40
-local velocity = Vector3.new()
-
--- ---------------- ScreenGui ----------------
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "Dat99013MenuGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
-
--- ---------------- Toggle Button ----------------
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Name = "ToggleButton"
-toggleBtn.Size = UDim2.new(0,60,0,60)
-toggleBtn.Position = UDim2.new(1,-80,1,-80)
-toggleBtn.AnchorPoint = Vector2.new(0,0)
-toggleBtn.BackgroundColor3 = Color3.fromRGB(8,45,88)
-toggleBtn.Text = "Menu"
-toggleBtn.TextScaled = true
-toggleBtn.Font = Enum.Font.SourceSansBold
-toggleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-toggleBtn.Parent = screenGui
-toggleBtn.ZIndex = 50
-
-local toggleCorner = Instance.new("UICorner", toggleBtn)
-toggleCorner.CornerRadius = UDim.new(0,12)
-local toggleStroke = Instance.new("UIStroke", toggleBtn)
-toggleStroke.Color = Color3.fromRGB(235,245,255)
-toggleStroke.Transparency = 0.65
-toggleStroke.Thickness = 1.4
-local toggleGradient = Instance.new("UIGradient", toggleBtn)
-toggleGradient.Color = ColorSequence.new(Color3.fromRGB(20,80,150), Color3.fromRGB(40,130,220))
-toggleGradient.Rotation = 250
-toggleGradient.Transparency = NumberSequence.new(0.15)
-
--- ---------------- Main Menu ----------------
-local panel = Instance.new("Frame")
-panel.Name = "MainPanel"
-panel.Size = UDim2.new(0,220,0,200)
-panel.Position = UDim2.new(1,-280,1,-300)
-panel.AnchorPoint = Vector2.new(0,0)
-panel.BackgroundColor3 = Color3.fromRGB(6,40,85)
-panel.BackgroundTransparency = 0.25
-panel.BorderSizePixel = 0
-panel.Parent = screenGui
-panel.ZIndex = 49
-
-local panelCorner = Instance.new("UICorner", panel)
-panelCorner.CornerRadius = UDim.new(0,12)
-local panelStroke = Instance.new("UIStroke", panel)
-panelStroke.Color = Color3.fromRGB(220,240,255)
-panelStroke.Transparency = 0.85
-panelStroke.Thickness = 1
-local panelGradient = Instance.new("UIGradient", panel)
-panelGradient.Color = ColorSequence.new(Color3.fromRGB(10,60,120), Color3.fromRGB(30,110,200))
-panelGradient.Rotation = 90
-panelGradient.Transparency = NumberSequence.new(0.4,0.15)
+local Frame = Instance.new("Frame")
+Frame.Parent = main
+Frame.BackgroundColor3 = Color3.fromRGB(20, 60, 150)
+Frame.BorderColor3 = Color3.fromRGB(15, 45, 120)
+Frame.Position = UDim2.new(0.1,0,0.4,0)
+Frame.Size = UDim2.new(0, 220, 0, 60)
+Frame.Active = true
+Frame.Draggable = true
 
 -- Title
-local title = Instance.new("TextLabel", panel)
-title.Size = UDim2.new(1,-20,0,36)
-title.Position = UDim2.new(0,10,0,6)
-title.BackgroundTransparency = 1
-title.Text = "Dat99013 Menu"
-title.TextColor3 = Color3.fromRGB(255,255,255)
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 20
-title.TextXAlignment = Enum.TextXAlignment.Left
+local TextLabel = Instance.new("TextLabel")
+TextLabel.Parent = Frame
+TextLabel.Size = UDim2.new(1,0,0,28)
+TextLabel.Position = UDim2.new(0,0,0,0)
+TextLabel.BackgroundTransparency = 1
+TextLabel.Text = "FLY GUI V5"
+TextLabel.TextColor3 = Color3.fromRGB(255,255,255)
+TextLabel.TextScaled = true
+TextLabel.Font = Enum.Font.SourceSansBold
 
-local subtitle = Instance.new("TextLabel", panel)
-subtitle.Size = UDim2.new(1,-20,0,16)
-subtitle.Position = UDim2.new(0,10,0,40)
-subtitle.BackgroundTransparency = 1
-subtitle.Text = "Drag to move • Tap title to hide"
-subtitle.TextColor3 = Color3.fromRGB(220,230,240)
-subtitle.Font = Enum.Font.SourceSans
-subtitle.TextSize = 12
-subtitle.TextXAlignment = Enum.TextXAlignment.Left
+-- Fly toggle
+local onof = Instance.new("TextButton")
+onof.Parent = Frame
+onof.Size = UDim2.new(0, 60, 0, 28)
+onof.Position = UDim2.new(0.6, 0, 0.5, 0)
+onof.BackgroundColor3 = Color3.fromRGB(0, 120, 230)
+onof.TextColor3 = Color3.fromRGB(255,255,255)
+onof.Text = "Fly: OFF"
+onof.Font = Enum.Font.SourceSans
+onof.TextScaled = true
 
--- Buttons container
-local buttonsFrame = Instance.new("Frame", panel)
-buttonsFrame.Size = UDim2.new(1,-20,0,140)
-buttonsFrame.Position = UDim2.new(0,10,0,60)
-buttonsFrame.BackgroundTransparency = 1
+-- Noclip toggle
+local noclipBtn = Instance.new("TextButton")
+noclipBtn.Parent = Frame
+noclipBtn.Size = UDim2.new(0, 60, 0, 28)
+noclipBtn.Position = UDim2.new(0.8, 0, 0.5, 0)
+noclipBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
+noclipBtn.TextColor3 = Color3.fromRGB(255,255,255)
+noclipBtn.Text = "Noclip: OFF"
+noclipBtn.Font = Enum.Font.SourceSans
+noclipBtn.TextScaled = true
 
--- Helper to create toggle buttons
-local function makeToggleButton(name, y)
-	local b = Instance.new("TextButton", buttonsFrame)
-	b.Size = UDim2.new(1,0,0,40)
-	b.Position = UDim2.new(0,0,0,y)
-	b.BackgroundColor3 = Color3.fromRGB(12,60,115)
-	b.BorderSizePixel = 0
-	b.Text = name.." (OFF)"
-	b.TextColor3 = Color3.fromRGB(255,255,255)
-	b.TextScaled = true
-	b.Font = Enum.Font.SourceSansSemibold
-	b.AutoButtonColor = true
-	local c = Instance.new("UICorner", b)
-	c.CornerRadius = UDim.new(0,8)
-	local s = Instance.new("UIStroke", b)
-	s.Color = Color3.fromRGB(235,245,255)
-	s.Transparency = 0.7
-	s.Thickness = 1.4
-	return b
-end
+-- Up / Down buttons
+local up = Instance.new("TextButton")
+up.Parent = Frame
+up.Size = UDim2.new(0, 44, 0, 28)
+up.Position = UDim2.new(0,0,0.5,0)
+up.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+up.Text = "UP"
+up.TextColor3 = Color3.fromRGB(255,255,255)
+up.Font = Enum.Font.SourceSans
+up.TextScaled = true
 
-local flyBtn = makeToggleButton("Fly",0)
-local noclipBtn = makeToggleButton("Noclip",50)
-local invisBtn = makeToggleButton("Invisible",100)
+local down = Instance.new("TextButton")
+down.Parent = Frame
+down.Size = UDim2.new(0, 44, 0, 28)
+down.Position = UDim2.new(0.25,0,0.5,0)
+down.BackgroundColor3 = Color3.fromRGB(0, 150, 200)
+down.Text = "DOWN"
+down.TextColor3 = Color3.fromRGB(255,255,255)
+down.Font = Enum.Font.SourceSans
+down.TextScaled = true
 
--- ---------------- Drag & Snap Helper ----------------
-local function makeDraggable(frame,snapPadding)
-	local dragging, dragInput, dragStartPos, startPos = false,nil,Vector2.new(),UDim2.new()
-	frame.InputBegan:Connect(function(input)
-		if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-			dragging=true; dragInput=input; dragStartPos=input.Position; startPos=frame.Position
-			input.Changed:Connect(function()
-				if input.UserInputState==Enum.UserInputState.End then
-					dragging=false
-					local xOffset = frame.Position.X.Offset
-					local yOffset = frame.Position.Y.Offset
-					local screen = workspace.CurrentCamera.ViewportSize
-					if xOffset + frame.Size.X.Offset/2 < screen.X/2 then xOffset = snapPadding else xOffset = screen.X - frame.Size.X.Offset - snapPadding end
-					if yOffset < snapPadding then yOffset = snapPadding elseif yOffset + frame.Size.Y.Offset > screen.Y - snapPadding then yOffset = screen.Y - frame.Size.Y.Offset - snapPadding end
-					frame.Position = UDim2.new(0,xOffset,0,yOffset)
-				end
-			end)
-		end
-	end)
-	frame.InputChanged:Connect(function(input)
-		if input==dragInput and dragging then
-			local delta = input.Position - dragStartPos
-			frame.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
-		end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if input==dragInput and dragging then
-			local delta = input.Position - dragStartPos
-			frame.Position = UDim2.new(startPos.X.Scale,startPos.X.Offset+delta.X,startPos.Y.Scale,startPos.Y.Offset+delta.Y)
-		end
-	end)
-end
+-- Speed
+local plus = Instance.new("TextButton")
+plus.Parent = Frame
+plus.Size = UDim2.new(0, 40,0,28)
+plus.Position = UDim2.new(0.25,0,0,0)
+plus.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+plus.Text = "+"
+plus.TextColor3 = Color3.fromRGB(255,255,255)
+plus.Font = Enum.Font.SourceSans
+plus.TextScaled = true
 
-makeDraggable(panel,8)
-makeDraggable(toggleBtn,8)
+local mine = Instance.new("TextButton")
+mine.Parent = Frame
+mine.Size = UDim2.new(0, 40,0,28)
+mine.Position = UDim2.new(0,0,0,0)
+mine.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
+mine.Text = "-"
+mine.TextColor3 = Color3.fromRGB(255,255,255)
+mine.Font = Enum.Font.SourceSans
+mine.TextScaled = true
 
--- ---------------- Hide/Show ----------------
-local panelVisible=true
-toggleBtn.MouseButton1Click:Connect(function()
-	panelVisible=not panelVisible
-	panel.Visible=panelVisible
-	toggleBtn.Text = panelVisible and "Menu" or "Show"
+local speed = Instance.new("TextLabel")
+speed.Parent = Frame
+speed.Size = UDim2.new(0, 44,0,28)
+speed.Position = UDim2.new(0.5,0,0,0)
+speed.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
+speed.TextColor3 = Color3.fromRGB(255,255,255)
+speed.Text = "1"
+speed.TextScaled = true
+speed.Font = Enum.Font.SourceSans
+
+-- Minimize / Restore
+local mini = Instance.new("TextButton")
+mini.Parent = Frame
+mini.Size = UDim2.new(0,28,0,28)
+mini.Position = UDim2.new(0.9,0,0,0)
+mini.BackgroundColor3 = Color3.fromRGB(0,0,100)
+mini.Text = "-"
+mini.TextColor3 = Color3.fromRGB(255,255,255)
+mini.Font = Enum.Font.SourceSans
+mini.TextScaled = true
+
+local mini2 = Instance.new("TextButton")
+mini2.Parent = Frame
+mini2.Size = UDim2.new(0,28,0,28)
+mini2.Position = UDim2.new(0.9,0,0,0)
+mini2.BackgroundColor3 = Color3.fromRGB(0,0,100)
+mini2.Text = "+"
+mini2.TextColor3 = Color3.fromRGB(255,255,255)
+mini2.Font = Enum.Font.SourceSans
+mini2.TextScaled = true
+mini2.Visible = false
+
+-- ---------------- Fly & Noclip Logic ----------------
+local flying = false
+local noclip = false
+local speedVal = 1
+local flyUp, flyDown = false, false
+
+speed.Text = tostring(speedVal)
+
+onof.MouseButton1Click:Connect(function()
+	flying = not flying
+	onof.Text = "Fly: "..(flying and "ON" or "OFF")
+	hum.PlatformStand = flying
 end)
-title.InputBegan:Connect(function(input)
-	if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-		panelVisible=not panelVisible
-		panel.Visible=panelVisible
-		toggleBtn.Text = panelVisible and "Menu" or "Show"
-	end
+
+noclipBtn.MouseButton1Click:Connect(function()
+	noclip = not noclip
+	noclipBtn.Text = "Noclip: "..(noclip and "ON" or "OFF")
 end)
 
--- ---------------- Functionality ----------------
-local function applyNoclip(state)
-	noclip=state
-	noclipBtn.Text="Noclip ("..(state and "ON" or "OFF")..")"
-	if character then
-		for _,p in ipairs(character:GetDescendants()) do
-			if p:IsA("BasePart") then p.CanCollide = not state end
-		end
-	end
-end
+plus.MouseButton1Click:Connect(function()
+	speedVal = speedVal + 1
+	speed.Text = tostring(speedVal)
+end)
 
-local function applyInvisible(state)
-	invisible=state
-	invisBtn.Text="Invisible ("..(state and "ON" or "OFF")..")"
-	if character then
-		for _,p in ipairs(character:GetDescendants()) do
-			if p:IsA("BasePart") then p.LocalTransparencyModifier = state and 1 or 0 end
-			if p:IsA("Decal") then p.Transparency = state and 1 or 0 end
-		end
-	end
-end
-
-local function applyFly(state)
-	flying=state
-	flyBtn.Text="Fly ("..(state and "ON" or "OFF")..")"
-	if humanoid then pcall(function() humanoid.PlatformStand=state end) end
-	if not state then velocity=Vector3.new() end
-end
-
--- ---------------- Button Events ----------------
-flyBtn.MouseButton1Click:Connect(function() applyFly(not flying) end)
-noclipBtn.MouseButton1Click:Connect(function() applyNoclip(not noclip) end)
-invisBtn.MouseButton1Click:Connect(function() applyInvisible(not invisible) end)
-
--- ---------------- Keyboard support ----------------
-local holdForward,holdBack,holdUp,holdDown=false,false,false,false
-UserInputService.InputBegan:Connect(function(input,processed)
-	if processed then return end
-	if input.UserInputType==Enum.UserInputType.Keyboard then
-		local k=input.KeyCode
-		if k==Enum.KeyCode.W then holdForward=true end
-		if k==Enum.KeyCode.S then holdBack=true end
-		if k==Enum.KeyCode.Space then holdUp=true end
-		if k==Enum.KeyCode.LeftShift then holdDown=true end
-		if k==Enum.KeyCode.F then applyFly(not flying) end
-		if k==Enum.KeyCode.N then applyNoclip(not noclip) end
-		if k==Enum.KeyCode.G then applyInvisible(not invisible) end
+mine.MouseButton1Click:Connect(function()
+	if speedVal > 1 then
+		speedVal = speedVal - 1
+		speed.Text = tostring(speedVal)
 	end
 end)
 
-UserInputService.InputEnded:Connect(function(input)
-	if input.UserInputType==Enum.UserInputType.Keyboard then
-		local k=input.KeyCode
-		if k==Enum.KeyCode.W then holdForward=false end
-		if k==Enum.KeyCode.S then holdBack=false end
-		if k==Enum.KeyCode.Space then holdUp=false end
-		if k==Enum.KeyCode.LeftShift then holdDown=false end
-	end
+up.MouseButton1Click:Connect(function()
+	flyUp = true
+end)
+up.MouseButton1Release:Connect(function()
+	flyUp = false
 end)
 
--- ---------------- Heartbeat ----------------
+down.MouseButton1Click:Connect(function()
+	flyDown = true
+end)
+down.MouseButton1Release:Connect(function()
+	flyDown = false
+end)
+
+-- Heartbeat fly/noclip
 RunService.Heartbeat:Connect(function(dt)
-	if not character or not character.Parent then
-		refreshCharacterRefs()
-		if noclip then applyNoclip(true) end
-		if invisible then applyInvisible(true) end
-		if flying then applyFly(true) end
+	if flying then
+		local move = Vector3.new()
+		if flyUp then move = move + Vector3.new(0,1,0) end
+		if flyDown then move = move + Vector3.new(0,-1,0) end
+		hrp.CFrame = hrp.CFrame + move * speedVal * dt * 50
 	end
-
-	if noclip and character then
-		for _,p in ipairs(character:GetDescendants()) do
-			if p:IsA("BasePart") then p.CanCollide=false end
+	if noclip then
+		for _, part in pairs(char:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
 		end
-	end
-
-	if flying and hrp and humanoid and hrp.Parent then
-		local cam = workspace.CurrentCamera
-		local camCF = cam and cam.CFrame or CFrame.new()
-		local forward = Vector3.new(camCF.LookVector.X,0,camCF.LookVector.Z)
-		if forward.Magnitude>0 then forward=forward.Unit end
-		local moveDir = Vector3.new()
-		if holdForward then moveDir = moveDir + forward end
-		if holdBack then moveDir = moveDir - forward end
-		local vy=0
-		if holdUp then vy=vy+1 end
-		if holdDown then vy=vy-1 end
-		local desired = moveDir*FLY_SPEED + Vector3.new(0,vy*VERTICAL_SPEED,0)
-		velocity = desired
-		hrp.CFrame = hrp.CFrame + velocity*dt
 	end
 end)
 
--- ---------------- Respawn / Cleanup ----------------
-player.CharacterAdded:Connect(function()
-	wait(0.5)
-	refreshCharacterRefs()
-	if noclip then applyNoclip(true) end
-	if invisible then applyInvisible(true) end
-	if flying then applyFly(true) end
+-- Minimize / Restore
+mini.MouseButton1Click:Connect(function()
+	for i,v in pairs(Frame:GetChildren()) do
+		if v:IsA("TextButton") or v:IsA("TextLabel") then
+			if v ~= mini and v ~= mini2 then
+				v.Visible = false
+			end
+		end
+	end
+	mini.Visible = false
+	mini2.Visible = true
+end)
+
+mini2.MouseButton1Click:Connect(function()
+	for i,v in pairs(Frame:GetChildren()) do
+		if v:IsA("TextButton") or v:IsA("TextLabel") then
+			v.Visible = true
+		end
+	end
+	mini.Visible = true
+	mini2.Visible = false
 end)
