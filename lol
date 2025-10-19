@@ -1,16 +1,3 @@
--- LocalScript (place inside StarterPlayerScripts)
--- Admin-only, mobile-friendly teleport GUI
--- Features:
---   - Admin-only (2858006390)
---   - White theme, soft shadow, rounded corners
---   - Draggable menu (works with mouse & touch)
---   - Persist after death (ResetOnSpawn = false)
---   - Hide/Show toggle
---   - Search bar + live filter
---   - Player headshot avatars
---   - Teleport to players in server (local player MoveTo)
---   - Manual "Refresh" button + auto-updates on join/leave
-
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
