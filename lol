@@ -1,170 +1,447 @@
-local main = Instance.new("ScreenGui")
-local Frame = Instance.new("Frame")
-local up = Instance.new("TextButton")
-local down = Instance.new("TextButton")
-local onof = Instance.new("TextButton")
-local TextLabel = Instance.new("TextLabel")
-local plus = Instance.new("TextButton")
-local speed = Instance.new("TextLabel")
-local mine = Instance.new("TextButton")
-local closebutton = Instance.new("TextButton")
-local mini = Instance.new("TextButton")
-local mini2 = Instance.new("TextButton")
-local noclipBtn = Instance.new("TextButton") -- nút noclip
+-- LocalScript (place inside StarterPlayerScripts)
+-- Admin-only, mobile-friendly teleport GUI
+-- Features:
+--   - Admin-only (2858006390)
+--   - White theme, soft shadow, rounded corners
+--   - Draggable menu (works with mouse & touch)
+--   - Persist after death (ResetOnSpawn = false)
+--   - Hide/Show toggle
+--   - Search bar + live filter
+--   - Player headshot avatars
+--   - Teleport to players in server (local player MoveTo)
+--   - Manual "Refresh" button + auto-updates on join/leave
 
--- GUI Setup
-main.Name = "main"
-main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-main.ResetOnSpawn = false
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
-Frame.Parent = main
-Frame.BackgroundColor3 = Color3.fromRGB(163, 255, 137)
-Frame.BorderColor3 = Color3.fromRGB(103, 221, 213)
-Frame.Position = UDim2.new(0.1, 0, 0.38, 0)
-Frame.Size = UDim2.new(0, 190, 0, 57)
-
--- Fly Buttons
-up.Name = "up"; up.Parent = Frame; up.BackgroundColor3 = Color3.fromRGB(79, 255, 152)
-up.Size = UDim2.new(0, 44, 0, 28); up.Font = Enum.Font.SourceSans; up.Text = "UP"; up.TextColor3 = Color3.fromRGB(0, 0, 0); up.TextSize = 14
-down.Name = "down"; down.Parent = Frame; down.BackgroundColor3 = Color3.fromRGB(215, 255, 121)
-down.Position = UDim2.new(0, 0, 0.49, 0); down.Size = UDim2.new(0, 44, 0, 28); down.Font = Enum.Font.SourceSans; down.Text = "DOWN"; down.TextColor3 = Color3.fromRGB(0, 0, 0); down.TextSize = 14
-onof.Name = "onof"; onof.Parent = Frame; onof.BackgroundColor3 = Color3.fromRGB(255, 249, 74)
-onof.Position = UDim2.new(0.7, 0, 0.49, 0); onof.Size = UDim2.new(0, 56, 0, 28); onof.Font = Enum.Font.SourceSans; onof.Text = "FLY"; onof.TextColor3 = Color3.fromRGB(0,0,0); onof.TextSize = 14
-
--- Labels & Speed Controls
-TextLabel.Parent = Frame; TextLabel.BackgroundColor3 = Color3.fromRGB(242, 60, 255); TextLabel.Position = UDim2.new(0.47, 0, 0, 0)
-TextLabel.Size = UDim2.new(0, 100, 0, 28); TextLabel.Font = Enum.Font.SourceSans; TextLabel.Text = "FLY GUI V3"; TextLabel.TextColor3 = Color3.fromRGB(0,0,0); TextLabel.TextScaled = true; TextLabel.TextWrapped = true
-plus.Name = "plus"; plus.Parent = Frame; plus.BackgroundColor3 = Color3.fromRGB(133,145,255); plus.Position = UDim2.new(0.23,0,0,0); plus.Size = UDim2.new(0,45,0,28)
-plus.Font = Enum.Font.SourceSans; plus.Text = "+"; plus.TextColor3 = Color3.fromRGB(0,0,0); plus.TextScaled = true; plus.TextWrapped = true
-speed.Name = "speed"; speed.Parent = Frame; speed.BackgroundColor3 = Color3.fromRGB(255,85,0); speed.Position = UDim2.new(0.47,0,0.49,0); speed.Size = UDim2.new(0,44,0,28)
-speed.Font = Enum.Font.SourceSans; speed.Text = "1"; speed.TextColor3 = Color3.fromRGB(0,0,0); speed.TextScaled = true; speed.TextWrapped = true
-mine.Name = "mine"; mine.Parent = Frame; mine.BackgroundColor3 = Color3.fromRGB(123,255,247); mine.Position = UDim2.new(0.23,0,0.49,0); mine.Size = UDim2.new(0,45,0,29)
-mine.Font = Enum.Font.SourceSans; mine.Text = "-"; mine.TextColor3 = Color3.fromRGB(0,0,0); mine.TextScaled = true; mine.TextWrapped = true
-
--- Close & Minimize Buttons
-closebutton.Name = "Close"; closebutton.Parent = Frame; closebutton.BackgroundColor3 = Color3.fromRGB(225,25,0)
-closebutton.Font = Enum.Font.SourceSans; closebutton.Size = UDim2.new(0,45,0,28); closebutton.Text = "X"; closebutton.TextSize = 30; closebutton.Position = UDim2.new(0,0,-1,27)
-mini.Name = "minimize"; mini.Parent = Frame; mini.BackgroundColor3 = Color3.fromRGB(192,150,230); mini.Size = UDim2.new(0,45,0,28); mini.Text = "-"; mini.TextSize = 40; mini.Position = UDim2.new(0,44,-1,27)
-mini2.Name = "minimize2"; mini2.Parent = Frame; mini2.BackgroundColor3 = Color3.fromRGB(192,150,230); mini2.Size = UDim2.new(0,45,0,28); mini2.Text = "+"; mini2.TextSize = 40; mini2.Position = UDim2.new(0,44,-1,57); mini2.Visible = false
-
--- Noclip Button
-noclipBtn.Name = "noclip"; noclipBtn.Parent = Frame; noclipBtn.BackgroundColor3 = Color3.fromRGB(255,128,0)
-noclipBtn.Position = UDim2.new(0.6,0,0,0); noclipBtn.Size = UDim2.new(0,60,0,28); noclipBtn.Font = Enum.Font.SourceSans; noclipBtn.Text = "Noclip OFF"; noclipBtn.TextColor3 = Color3.fromRGB(0,0,0); noclipBtn.TextScaled = true; noclipBtn.TextWrapped = true
-
--- Variables
-local speeds = 1
-local nowe = false
-local noclipEnabled = false
-local tpwalking = false
-local player = game.Players.LocalPlayer
-Frame.Active = true
-Frame.Draggable = true
-
--- Noclip Function
-local function toggleNoclip()
-    noclipEnabled = not noclipEnabled
-    local chr = player.Character
-    if not chr then return end
-
-    if noclipEnabled then
-        noclipBtn.Text = "Noclip ON"
-        game:GetService("RunService").Stepped:Connect(function()
-            if noclipEnabled then
-                for _, part in pairs(chr:GetDescendants()) do
-                    if part:IsA("BasePart") then
-                        part.CanCollide = false
-                    end
-                end
-            end
-        end)
-    else
-        noclipBtn.Text = "Noclip OFF"
-        for _, part in pairs(chr:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
+-- ===== Admin config =====
+local Admins = {
+    2858006390
+}
+local function isAdmin(userId)
+    for _, id in ipairs(Admins) do
+        if id == userId then return true end
     end
+    return false
 end
 
-noclipBtn.MouseButton1Click:Connect(toggleNoclip)
+if not isAdmin(player.UserId) then
+    return -- not an admin: stop the script
+end
+-- ========================
 
--- Fly Logic
-local ctrl = {f=0,b=0,l=0,r=0}
-local lastctrl = {f=0,b=0,l=0,r=0}
+-- ===== Helpers =====
+local function applyRounded(uiElement, radius)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, radius or 12)
+    corner.Parent = uiElement
+end
 
-local function startFly()
-    nowe = true
-    local chr = player.Character
-    local hum = chr:FindFirstChildWhichIsA("Humanoid")
-    if not hum then return end
-    hum.PlatformStand = true
+local function makeShadow(parent, size, pos)
+    local shadow = Instance.new("Frame")
+    shadow.Size = size or UDim2.new(1, 6, 1, 6)
+    shadow.Position = pos or UDim2.new(0, 3, 0, 3)
+    shadow.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    shadow.BackgroundTransparency = 0.85
+    shadow.ZIndex = 0
+    shadow.Parent = parent
+    applyRounded(shadow, 18)
+    return shadow
+end
 
-    local torso = chr:FindFirstChild("Torso") or chr:FindFirstChild("UpperTorso")
-    local bg = Instance.new("BodyGyro", torso)
-    bg.P = 9e4
-    bg.MaxTorque = Vector3.new(9e9,9e9,9e9)
-    bg.CFrame = torso.CFrame
-    local bv = Instance.new("BodyVelocity", torso)
-    bv.MaxForce = Vector3.new(9e9,9e9,9e9)
-    bv.Velocity = Vector3.new(0,0.1,0)
+-- ===== ScreenGui =====
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "TeleportMenu"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = PlayerGui
 
-    spawn(function()
-        local rs = game:GetService("RunService").RenderStepped
-        local speed = speeds
-        while nowe and hum.Health>0 do
-            rs:Wait()
-            local moveDir = ((workspace.CurrentCamera.CFrame.lookVector * (ctrl.f+ctrl.b)) + ((workspace.CurrentCamera.CFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - workspace.CurrentCamera.CFrame.p)) * speed
-            bv.Velocity = moveDir
-            bg.CFrame = workspace.CurrentCamera.CFrame
+-- ===== Toggle Button =====
+local toggleBGShadow = makeShadow(screenGui, UDim2.new(0, 120, 0, 48), UDim2.new(0, 18, 0, 18))
+local toggleBG = Instance.new("Frame")
+toggleBG.Size = UDim2.new(0, 120, 0, 48)
+toggleBG.Position = UDim2.new(0, 12, 0, 12)
+toggleBG.BackgroundColor3 = Color3.fromRGB(255,255,255)
+toggleBG.ZIndex = 2
+toggleBG.Parent = screenGui
+applyRounded(toggleBG, 14)
+
+local toggleText = Instance.new("TextLabel")
+toggleText.Size = UDim2.new(1, 0, 1, 0)
+toggleText.BackgroundTransparency = 1
+toggleText.Font = Enum.Font.GothamBold
+toggleText.TextSize = 16
+toggleText.TextColor3 = Color3.fromRGB(28,28,28)
+toggleText.Text = "Hide Menu"
+toggleText.Parent = toggleBG
+toggleText.ZIndex = 3
+
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 120, 0, 48)
+toggleButton.Position = UDim2.new(0, 12, 0, 12)
+toggleButton.BackgroundTransparency = 1
+toggleButton.Text = ""
+toggleButton.ZIndex = 4
+toggleButton.Parent = screenGui
+
+-- ===== Main Frame =====
+local mainShadow = makeShadow(screenGui, UDim2.new(0, 320, 0, 420), UDim2.new(0, 18, 0, 78))
+mainShadow.ZIndex = 1
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Size = UDim2.new(0, 320, 0, 420)
+mainFrame.Position = UDim2.new(0, 12, 0, 78)
+mainFrame.BackgroundColor3 = Color3.fromRGB(255,255,255)
+mainFrame.ZIndex = 2
+mainFrame.Parent = screenGui
+applyRounded(mainFrame, 16)
+mainFrame.ClipsDescendants = true
+
+-- Header (drag handle)
+local header = Instance.new("Frame")
+header.Size = UDim2.new(1, 0, 0, 60)
+header.Position = UDim2.new(0, 0, 0, 0)
+header.BackgroundTransparency = 1
+header.Parent = mainFrame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -24, 1, 0)
+title.Position = UDim2.new(0, 12, 0, 12)
+title.BackgroundTransparency = 1
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(28,28,28)
+title.Text = "Teleport Menu"
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = header
+
+-- Close/hide small icon (also clickable)
+local smallToggle = Instance.new("TextButton")
+smallToggle.Size = UDim2.new(0, 32, 0, 32)
+smallToggle.Position = UDim2.new(1, -44, 0, 14)
+smallToggle.BackgroundTransparency = 1
+smallToggle.Font = Enum.Font.Gotham
+smallToggle.TextSize = 18
+smallToggle.Text = "✕"
+smallToggle.TextColor3 = Color3.fromRGB(120,120,120)
+smallToggle.Parent = header
+smallToggle.ZIndex = 4
+
+-- Divider
+local divider = Instance.new("Frame")
+divider.Size = UDim2.new(1, -24, 0, 1)
+divider.Position = UDim2.new(0, 12, 0, 60)
+divider.BackgroundColor3 = Color3.fromRGB(240,240,240)
+divider.Parent = mainFrame
+
+-- Search box
+local searchBox = Instance.new("TextBox")
+searchBox.Size = UDim2.new(1, -132, 0, 44)
+searchBox.Position = UDim2.new(0, 12, 0, 74)
+searchBox.PlaceholderText = "Search players..."
+searchBox.Font = Enum.Font.Gotham
+searchBox.TextSize = 16
+searchBox.Text = ""
+searchBox.TextColor3 = Color3.fromRGB(28,28,28)
+searchBox.BackgroundColor3 = Color3.fromRGB(248,248,248)
+searchBox.Parent = mainFrame
+applyRounded(searchBox, 12)
+searchBox.ZIndex = 3
+
+-- Refresh button
+local refreshBtn = Instance.new("TextButton")
+refreshBtn.Size = UDim2.new(0, 92, 0, 44)
+refreshBtn.Position = UDim2.new(1, -104, 0, 74)
+refreshBtn.Text = "Refresh"
+refreshBtn.Font = Enum.Font.GothamBold
+refreshBtn.TextSize = 15
+refreshBtn.TextColor3 = Color3.fromRGB(28,28,28)
+refreshBtn.BackgroundColor3 = Color3.fromRGB(250,250,250)
+refreshBtn.Parent = mainFrame
+applyRounded(refreshBtn, 12)
+refreshBtn.ZIndex = 3
+
+-- Status label
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, -24, 0, 36)
+statusLabel.Position = UDim2.new(0, 12, 1, -48)
+statusLabel.BackgroundTransparency = 1
+statusLabel.Font = Enum.Font.Gotham
+statusLabel.TextSize = 14
+statusLabel.TextColor3 = Color3.fromRGB(110,110,110)
+statusLabel.Text = "Tap a player to teleport"
+statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+statusLabel.Parent = mainFrame
+statusLabel.ZIndex = 3
+
+-- Scrolling list
+local listFrame = Instance.new("ScrollingFrame")
+listFrame.Size = UDim2.new(1, -24, 0, 250)
+listFrame.Position = UDim2.new(0, 12, 0, 128)
+listFrame.BackgroundTransparency = 1
+listFrame.ScrollBarThickness = 6
+listFrame.Parent = mainFrame
+listFrame.ZIndex = 3
+
+local uiList = Instance.new("UIListLayout")
+uiList.Padding = UDim.new(0, 8)
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+uiList.Parent = listFrame
+
+local uiPadding = Instance.new("UIPadding")
+uiPadding.PaddingTop = UDim.new(0, 6)
+uiPadding.PaddingLeft = UDim.new(0, 6)
+uiPadding.PaddingRight = UDim.new(0, 6)
+uiPadding.PaddingBottom = UDim.new(0, 6)
+uiPadding.Parent = listFrame
+
+-- Template size for each player entry (used for layout consistency)
+local ENTRY_HEIGHT = 64
+
+-- ===== Dragging logic (works for mouse & touch) =====
+local dragging = false
+local dragStart = Vector2.new()
+local startPos = Vector2.new()
+
+local function beginDrag(input)
+    dragging = true
+    dragStart = input.Position
+    local absPos = mainFrame.AbsolutePosition
+    startPos = Vector2.new(absPos.X, absPos.Y)
+    UserInputService.InputChanged:Connect(function(move)
+        if dragging and move.UserInputType == input.UserInputType then
+            local delta = move.Position - dragStart
+            local newPos = startPos + delta
+            -- keep onscreen bounds (optional clamp)
+            local screenSize = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920,1080)
+            local clampedX = math.clamp(newPos.X, 0, screenSize.X - mainFrame.AbsoluteSize.X)
+            local clampedY = math.clamp(newPos.Y, 0, screenSize.Y - mainFrame.AbsoluteSize.Y)
+            mainFrame.Position = UDim2.new(0, clampedX, 0, clampedY)
         end
-        bv:Destroy()
-        bg:Destroy()
-        hum.PlatformStand = false
     end)
 end
 
-local function stopFly()
-    nowe = false
-    local chr = player.Character
-    local hum = chr:FindFirstChildWhichIsA("Humanoid")
-    if hum then hum.PlatformStand = false end
+local function endDrag()
+    dragging = false
 end
 
-onof.MouseButton1Click:Connect(function()
-    if nowe then stopFly() else startFly() end
+-- Connect to header for dragging (both mouse & touch)
+header.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        beginDrag(input)
+    end
+end)
+header.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        endDrag()
+    end
+end)
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        endDrag()
+    end
 end)
 
--- GUI Events: UP/DOWN
-up.MouseButton1Down:Connect(function()
-    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.CFrame = hrp.CFrame + Vector3.new(0,1,0) end
+-- ===== Utilities: create player entry with avatar =====
+local function getAvatarUrlAsync(userId)
+    -- returns a headshot thumbnail URL (size 48) or nil on failure
+    local thumbnail
+    local ok, result = pcall(function()
+        return Players:GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size48x48)
+    end)
+    if ok and type(result) == "string" then
+        thumbnail = result
+    end
+    return thumbnail
+end
+
+local function clearPlayerList()
+    for _, child in ipairs(listFrame:GetChildren()) do
+        if child:IsA("Frame") or child:IsA("TextButton") or child:IsA("ImageButton") then
+            child:Destroy()
+        end
+    end
+    -- UIListLayout & UIPadding remain
+end
+
+local function createPlayerEntry(pl)
+    local entry = Instance.new("Frame")
+    entry.Size = UDim2.new(1, -12, 0, ENTRY_HEIGHT)
+    entry.BackgroundTransparency = 1
+    entry.Parent = listFrame
+
+    -- Button covers entry
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.Position = UDim2.new(0, 0, 0, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(250,250,250)
+    btn.AutoButtonColor = true
+    btn.Font = Enum.Font.Gotham
+    btn.Text = ""
+    btn.Parent = entry
+    applyRounded(btn, 10)
+
+    -- Avatar image
+    local avatar = Instance.new("ImageLabel")
+    avatar.Size = UDim2.new(0, 48, 0, 48)
+    avatar.Position = UDim2.new(0, 6, 0.5, -24)
+    avatar.BackgroundColor3 = Color3.fromRGB(235,235,235)
+    avatar.Parent = btn
+    applyRounded(avatar, 999)
+    avatar.ZIndex = 5
+
+    -- Player name label
+    local nameLabel = Instance.new("TextLabel")
+    nameLabel.Size = UDim2.new(1, -80, 1, 0)
+    nameLabel.Position = UDim2.new(0, 68, 0, 0)
+    nameLabel.BackgroundTransparency = 1
+    nameLabel.Font = Enum.Font.GothamBold
+    nameLabel.TextSize = 16
+    nameLabel.TextColor3 = Color3.fromRGB(28,28,28)
+    nameLabel.Text = pl.Name
+    nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+    nameLabel.Parent = btn
+
+    -- UserId small label
+    local idLabel = Instance.new("TextLabel")
+    idLabel.Size = UDim2.new(0.4, -80, 0, 20)
+    idLabel.Position = UDim2.new(0.6, 0, 0.5, 6)
+    idLabel.BackgroundTransparency = 1
+    idLabel.Font = Enum.Font.Gotham
+    idLabel.TextSize = 12
+    idLabel.TextColor3 = Color3.fromRGB(120,120,120)
+    idLabel.Text = "ID: ".. tostring(pl.UserId)
+    idLabel.TextXAlignment = Enum.TextXAlignment.Left
+    idLabel.Parent = btn
+
+    -- Set avatar image async
+    spawn(function()
+        local url = getAvatarUrlAsync(pl.UserId)
+        if url then
+            -- pcall in case of race conditions
+            pcall(function() avatar.Image = url end)
+        else
+            -- fallback blank color (already set)
+        end
+    end)
+
+    -- Teleport on click
+    btn.MouseButton1Click:Connect(function()
+        local targetChar = pl.Character
+        local myChar = player.Character
+        if not myChar then
+            statusLabel.Text = "You have no character."
+            return
+        end
+        if not targetChar then
+            statusLabel.Text = pl.Name .. " has no character."
+            return
+        end
+        local targetPart = targetChar:FindFirstChild("HumanoidRootPart") or targetChar.PrimaryPart
+        if not targetPart then
+            statusLabel.Text = "Target has no root part."
+            return
+        end
+        local ok, err = pcall(function()
+            myChar:MoveTo(targetPart.Position)
+        end)
+        if ok then
+            statusLabel.Text = "Teleported to " .. pl.Name
+        else
+            statusLabel.Text = "Teleport failed: " .. tostring(err)
+        end
+    end)
+
+    return entry
+end
+
+-- ===== Build & update list =====
+local function updatePlayerEntries(filter)
+    filter = filter and filter:lower() or ""
+    clearPlayerList()
+    local playersAdded = 0
+    for _, pl in ipairs(Players:GetPlayers()) do
+        if pl ~= player then
+            local nameLower = (pl.Name or ""):lower()
+            local displayNameLower = (pl.DisplayName or ""):lower()
+            if filter == "" or nameLower:find(filter, 1, true) or displayNameLower:find(filter, 1, true) then
+                createPlayerEntry(pl)
+                playersAdded = playersAdded + 1
+            end
+        end
+    end
+    if playersAdded == 0 then
+        local emptyLabel = Instance.new("TextLabel")
+        emptyLabel.Size = UDim2.new(1, -12, 0, 48)
+        emptyLabel.BackgroundTransparency = 1
+        emptyLabel.Font = Enum.Font.Gotham
+        emptyLabel.TextSize = 14
+        emptyLabel.TextColor3 = Color3.fromRGB(140,140,140)
+        emptyLabel.Text = "No players found."
+        emptyLabel.Parent = listFrame
+    end
+end
+
+-- Manual refresh action
+local function doRefresh()
+    statusLabel.Text = "Refreshing player list..."
+    updatePlayerEntries(searchBox.Text)
+    statusLabel.Text = "Player list refreshed"
+    -- clear message after a short delay
+    delay(2, function()
+        if statusLabel and statusLabel.Parent then
+            statusLabel.Text = "Tap a player to teleport"
+        end
+    end)
+end
+
+-- Connect Refresh button
+refreshBtn.MouseButton1Click:Connect(doRefresh)
+
+-- Search live filtering
+searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local txt = searchBox.Text
+    updatePlayerEntries(txt)
 end)
 
-down.MouseButton1Down:Connect(function()
-    local hrp = player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.CFrame = hrp.CFrame + Vector3.new(0,-1,0) end
+-- Toggle hide/show
+local function setMenuVisible(visible)
+    mainFrame.Visible = visible
+    if visible then
+        toggleText.Text = "Hide Menu"
+    else
+        toggleText.Text = "Show Menu"
+    end
+end
+
+toggleButton.MouseButton1Click:Connect(function()
+    setMenuVisible(not mainFrame.Visible)
+end)
+smallToggle.MouseButton1Click:Connect(function()
+    setMenuVisible(false)
 end)
 
--- Speed Buttons
-plus.MouseButton1Click:Connect(function()
-    speeds = speeds + 1
-    speed.Text = speeds
+-- Auto-update on joins/leaves (but manual Refresh still available)
+Players.PlayerAdded:Connect(function()
+    -- update only if currently visible or if search empty (avoid disrupting)
+    if mainFrame.Visible then
+        updatePlayerEntries(searchBox.Text)
+    end
+end)
+Players.PlayerRemoving:Connect(function()
+    if mainFrame.Visible then
+        updatePlayerEntries(searchBox.Text)
+    end
 end)
 
-mine.MouseButton1Click:Connect(function()
-    if speeds>1 then speeds = speeds -1 end
-    speed.Text = speeds
+-- initial population
+updatePlayerEntries("")
+
+-- Clean up on destroy (optional safety)
+screenGui.Destroying:Connect(function()
+    -- nothing special required
 end)
 
--- Close / Minimize
-closebutton.MouseButton1Click:Connect(function() main:Destroy() end)
-mini.MouseButton1Click:Connect(function()
-    up.Visible=false; down.Visible=false; onof.Visible=false; plus.Visible=false; speed.Visible=false; mine.Visible=false; mini.Visible=false; mini2.Visible=true; noclipBtn.Visible=false
-    Frame.BackgroundTransparency=1; closebutton.Position=UDim2.new(0,0,-1,57)
-end)
-mini2.MouseButton1Click:Connect(function()
-    up.Visible=true; down.Visible=true; onof.Visible=true; plus.Visible=true; speed.Visible=true; mine.Visible=true; mini.Visible=true; mini2.Visible=false; noclipBtn.Visible=true
-    Frame.BackgroundTransparency=0; closebutton.Position=UDim2.new(0,0,-1,27)
-end)
+-- Done
